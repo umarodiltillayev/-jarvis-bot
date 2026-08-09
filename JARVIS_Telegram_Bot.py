@@ -5,16 +5,23 @@ from google import genai
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
+# Render uchun fake web server - GET va HEAD ni ham qabul qiladi
 class KeepAlive(BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"JARVIS IS ONLINE")
+        self.send_response(200); self.end_headers(); self.wfile.write(b"JARVIS IS ONLINE")
+    def do_HEAD(self):
+        self.send_response(200); self.end_headers()
+    def log_message(self, *args): return
 
 threading.Thread(target=lambda: HTTPServer(('0.0.0.0', 10000), KeepAlive).serve_forever(), daemon=True).start()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not BOT_TOKEN:
+    print("XATO: BOT_TOKEN topilmadi! Render Environment ga qo'sh!")
+    raise SystemExit(1)
+
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -22,10 +29,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
-    if not client:
-        await update.message.reply_text("Kalit yo'q Boss")
-        return
     try:
+        if not client:
+            await update.message.reply_text("GEMINI_API_KEY yo'q Boss")
+            return
         res = client.models.generate_content(model="gemini-2.0-flash", contents=text)
         await update.message.reply_text(res.text)
     except Exception as e:
@@ -34,5 +41,5 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-print("JARVIS started")
+print("JARVIS started - polling...")
 app.run_polling()
