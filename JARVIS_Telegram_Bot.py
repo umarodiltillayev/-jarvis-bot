@@ -1,3 +1,10 @@
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+
+class KeepAlive(BaseHTTPRequestHandler):
+    def do_GET(self): self.send_response(200); self.end_headers(); self.wfile.write(b"JARVIS IS ONLINE")
+
+threading.Thread(target=lambda: HTTPServer(('0.0.0.0', 10000), KeepAlive).serve_forever(), daemon=True).start()
 import os
 import asyncio
 from google import genai
