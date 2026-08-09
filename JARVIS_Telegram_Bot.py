@@ -23,7 +23,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        res = client.models.generate_content(model="gemini-2.5-flash", contents=update.message.text)
+        # Google yangi talab qilgan nom
+        res = client.models.generate_content(model="gemini-flash-latest", contents=update.message.text)
         await update.message.reply_text(res.text)
     except Exception as e:
         await update.message.reply_text(f"Xato: {e}")
