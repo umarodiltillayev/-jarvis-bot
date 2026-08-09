@@ -33,7 +33,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not client:
             await update.message.reply_text("GEMINI_API_KEY yo'q Boss")
             return
-        res = client.models.generate_content(model="gemini-2.0-flash", contents=text)
+res = client.models.generate_content(model="gemini-1.5-flash", contents=text)
         await update.message.reply_text(res.text)
     except Exception as e:
         await update.message.reply_text(f"Xato: {e}")
