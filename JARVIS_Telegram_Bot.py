@@ -1,10 +1,9 @@
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import os
-import asyncio
 from google import genai
 from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 class KeepAlive(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -22,18 +21,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Salom Boss! JARVIS MK II ONLAYN! 🚀")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_text = update.message.text
+    text = update.message.text
     if not client:
-        await update.message.reply_text(f"Kalit yo'q: {user_text}")
+        await update.message.reply_text("Kalit yo'q Boss")
         return
     try:
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=user_text)
-        await update.message.reply_text(response.text)
+        res = client.models.generate_content(model="gemini-2.0-flash", contents=text)
+        await update.message.reply_text(res.text)
     except Exception as e:
-        await update.message.reply_text(f"Xatolik: {e}")
+        await update.message.reply_text(f"Xato: {e}")
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-print("JARVIS ishga tushdi...")
+print("JARVIS started")
 app.run_polling()
